@@ -8,6 +8,8 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const buttonGetToCurrentLocation = document.querySelector('.sendMeHome');
+let editButton = null;
+let forms = null;
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
@@ -48,7 +50,6 @@ class Running extends Workout {
   }
   calcPace() {
     //min/km;
-    console.log(this);
     this.pace = this.duration / this.distance;
     return this.pace;
   }
@@ -98,7 +99,6 @@ class App {
     });
   }
   _sendHome() {
-    console.log(this.#workouts);
     let buttonClicked = true;
     navigator.geolocation.getCurrentPosition(
       position => {
@@ -132,7 +132,6 @@ class App {
     const clickedElement = currentElement.getAttribute('data-id');
     const workOut = this.#workouts.find(i => i.id === clickedElement);
     const coords = workOut.coords;
-    console.log(workOut);
     this._moveTo(coords);
   }
   _getPosition() {
@@ -153,12 +152,8 @@ class App {
   }
   _loadMap(position) {
     const { latitude, longitude } = position.coords;
-    console.log(latitude);
-    console.log(longitude);
     const coords = [latitude, longitude];
-    console.log(`Setting map`);
     this.#map = L.map('map').setView(coords, 13);
-    console.log(`Map set`);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -174,7 +169,6 @@ class App {
     this._renderStoredWorkOuts();
   }
   _showForm(mapE) {
-    console.log(mapE);
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
     inputDistance.focus();
@@ -220,7 +214,6 @@ class App {
     //Add new object to the workout array
     this.#workouts.push(workout);
 
-    console.log(workout);
     //Clear inputs
     this._hideForm();
     const popUpCoords = [lat, lng];
@@ -242,9 +235,6 @@ class App {
     setTimeout(() => (form.style.display = 'grid'), 1000);
   }
   _renderWorkoutMarker(workout) {
-    console.log(
-      `${workout.type[0].toLowerCase()}${workout.type.slice(1)}-popup`
-    );
     L.marker(workout.coords)
       .addTo(this.#map)
       .bindPopup(
@@ -264,6 +254,10 @@ class App {
   _renderWorkout(workout) {
     let html = `
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
+        <div class="editButton">
+        <button class="saveButton">Save ✅</button>
+        <span>...</span>
+        </div>
         <h2 class="workout__title">${workout.description}</h2>
         <div class="workout__details">
           <span class="workout__icon">${
@@ -309,6 +303,23 @@ class App {
     `;
     }
     form.insertAdjacentHTML('afterend', html);
+    // if (editButton) return;
+    editButton = document.querySelector('.editButton');
+    editButton.addEventListener('click', this.#eventHandlerForEdit.bind(this));
+  }
+  #eventHandlerForEdit(event) {
+    editButton.classList.add('hidden');
+    const currentElement = event.target
+      .closest('.workout')
+      .querySelectorAll('.workout__details');
+
+    for (const element of currentElement) {
+      const tempEl = element.querySelector('.workout__value');
+      console.log(element);
+      const previousValue = tempEl.textContent;
+      console.log(previousValue);
+      tempEl.innerHTML = `<input class="form__input_onEdit form__input--distance" placeholder="${previousValue}" />`;
+    }
   }
 }
 
