@@ -9,6 +9,7 @@ const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const buttonGetToCurrentLocation = document.querySelector('.sendMeHome');
 let editButton = null;
+let saveButton_ui = null;
 let forms = null;
 class Workout {
   date = new Date();
@@ -177,12 +178,18 @@ class App {
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
   }
-
+  #validateInputs(...inputs) {
+    return inputs.every(i => Number.isFinite(i));
+  }
+  #allPositive(...inputs) {
+    return inputs.every(i => i > 0);
+  }
   _newWorkOut(event) {
+    console.log(`Save was performed`);
     //Helper function to check if inputs are integer
-    const validateInputs = (...inputs) => inputs.every(i => Number.isFinite(i));
+    // const validateInputs = (...inputs) => inputs.every(i => Number.isFinite(i));
     //Helper function to check if all given values are greater than 0
-    const allPositive = (...inputs) => inputs.every(i => i > 0);
+    // const allPositive = (...inputs) => inputs.every(i => i > 0);
     event.preventDefault();
     // get data from form
     const type = inputType.value;
@@ -194,8 +201,8 @@ class App {
     if (type === 'running') {
       const cadence = +inputCadence.value;
       if (
-        !validateInputs(distance, duration, cadence) ||
-        !allPositive(distance, duration, cadence)
+        !this.#validateInputs(distance, duration, cadence) ||
+        !this.#allPositive(distance, duration, cadence)
       )
         return alert('Inputs have to be positive number');
       workout = new Running([lat, lng], distance, duration, cadence);
@@ -204,8 +211,8 @@ class App {
     if (type === 'cycling') {
       const elevation = +inputElevation.value;
       if (
-        !validateInputs(distance, duration, elevation) ||
-        !allPositive(distance, duration)
+        !this.#validateInputs(distance, duration, elevation) ||
+        !this.#allPositive(distance, duration)
       )
         return alert('Inputs have to be positive number');
       workout = new Cycling([lat, lng], distance, duration, elevation);
@@ -255,7 +262,6 @@ class App {
     let html = `
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
         <div class="editButton">
-        <button class="saveButton">Save ✅</button>
         <span>...</span>
         </div>
         <h2 class="workout__title">${workout.description}</h2>
@@ -284,7 +290,7 @@ class App {
             <span class="workout__value">${workout.pace.toFixed(1)}</span>
             <span class="workout__unit">spm</span>
             </div>
-        </li>
+        
   `;
     }
     if (workout.type === 'Cycling') {
@@ -299,27 +305,44 @@ class App {
             <span class="workout__value">${workout.elevationGain}</span>
             <span class="workout__unit">m</span>
             </div>
-            </li>
+            
     `;
     }
+    //Adding save button in the end
+    html += `
+    <div class="layer1 hiddenParent">
+    <button class="saveButton">Save ✅</button>
+    </div>
+    </li>`;
     form.insertAdjacentHTML('afterend', html);
     // if (editButton) return;
     editButton = document.querySelector('.editButton');
+    saveButton_ui = document.querySelector('.saveButton');
     editButton.addEventListener('click', this.#eventHandlerForEdit.bind(this));
+    saveButton_ui.addEventListener('click', this.#saveEdit.bind(this));
   }
   #eventHandlerForEdit(event) {
     editButton.classList.add('hidden');
     const currentElement = event.target
       .closest('.workout')
       .querySelectorAll('.workout__details');
-
     for (const element of currentElement) {
       const tempEl = element.querySelector('.workout__value');
-      console.log(element);
       const previousValue = tempEl.textContent;
-      console.log(previousValue);
-      tempEl.innerHTML = `<input class="form__input_onEdit form__input--distance" placeholder="${previousValue}" />`;
+      tempEl.innerHTML = `<input class="form__input_onEdit form__input--distance" placeholder="${previousValue}"  />`;
     }
+    const currentElement1 = event.target.closest('.workout');
+    console.log(currentElement1);
+    editButton.classList.add('hiddenParent');
+    currentElement1.querySelector('.layer1').classList.remove('hiddenParent');
+  }
+  #saveEdit(event) {
+    const tempInput = event.currentTarget
+      .closest('.workout')
+      .querySelectorAll('.form__input_onEdit');
+    const arrayOfNodeLists = Array.from(tempInput);
+    const inputs = arrayOfNodeLists.map(i => i.value);
+    console.log(inputs);
   }
 }
 
