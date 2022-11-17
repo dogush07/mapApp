@@ -287,7 +287,7 @@ class App {
             </div>
             <div class="workout__details">
             <span class="workout__icon">🦶🏼</span>
-            <span class="workout__value">${workout.pace.toFixed(1)}</span>
+            <span class="workout__value">${workout.candace.toFixed(1)}</span>
             <span class="workout__unit">spm</span>
             </div>
         
@@ -332,7 +332,6 @@ class App {
       tempEl.innerHTML = `<input class="form__input_onEdit form__input--distance" placeholder="${previousValue}"  />`;
     }
     const currentElement1 = event.target.closest('.workout');
-    console.log(currentElement1);
     editButton.classList.add('hiddenParent');
     currentElement1.querySelector('.layer1').classList.remove('hiddenParent');
   }
@@ -340,10 +339,18 @@ class App {
     const tempInput = event.currentTarget
       .closest('.workout')
       .querySelectorAll('.form__input_onEdit');
+    const currentWorkOutId = event.currentTarget
+      .closest('.workout')
+      .getAttribute('data-id');
     const arrayOfNodeLists = Array.from(tempInput);
     const inputs = arrayOfNodeLists.map(i => i.value);
-    console.log(inputs);
-    //as the next step get the inputs and update the object.
+    const currentWorkOut = this.#workouts.find(i => i.id === currentWorkOutId);
+    const [distance, duration] = [...inputs];
+
+    if (currentWorkOut.type === 'Running') {
+    }
+    // const
+    //as the next step disable last two parameter to be editable
   }
 }
 
