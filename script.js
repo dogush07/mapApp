@@ -343,6 +343,7 @@ class App {
     const arrayOfNodeLists = Array.from(tempInput);
     const inputs = arrayOfNodeLists.map(i => i.value);
     console.log(inputs);
+    //as the next step get the inputs and update the object.
   }
 }
 
